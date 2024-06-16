@@ -76,6 +76,13 @@ To run this script, ensure you have the following installed:
 5. **Serial Number of Target Contact in Lusha List:** LINE 156
 
 
+## RUN 
+
+ ```sh
+       Python Combined.py
+        ```
+
+
 ## Manual Stuff To Do 
 
 1. When the chrome browser opens, it opens two tabs of lusha , close the righter tab immediately
