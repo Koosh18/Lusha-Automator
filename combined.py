@@ -1,3 +1,4 @@
+#HEADERS :
 import logging
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,6 +11,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 import time
 import pandas as pd
 
+# SWITCHING TO LUSHA FRAME TO INTERACT
 def switch_to_extension_frame(driver):
     try:
         wait = WebDriverWait(driver, 10)
@@ -19,6 +21,7 @@ def switch_to_extension_frame(driver):
         logging.error("Timeout while waiting to switch to Lusha extension iframe")
     except NoSuchElementException:
         logging.error("Lusha extension iframe not found")
+
 
 # Read company names from Excel file
 company_df = pd.read_excel("C:\\Users\\Koosh Gupta\\OneDrive\\Desktop\\Company list.xlsx")  # Update with your file path
@@ -30,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 # Setup Chrome options
 options = webdriver.ChromeOptions()
-options.add_extension("C:\\Users\\Koosh Gupta\\Python\\selenium\\10.4.2_0.crx")
+options.add_extension("C:\\Users\\Koosh Gupta\\Python\\selenium\\10.4.2_0.crx") # LOCATION OF YOUR LUSHA CRX FILE 
 
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
@@ -38,6 +41,7 @@ driver = webdriver.Chrome(service=service, options=options)
 # Create an empty list to store data for all companies
 all_data = []
 
+#OPENING LUSHA WEBSITE 
 try:
     logger.info("Opening the Lusha website")
     driver.get("https://auth.lusha.com/login?returnUrl=https%3A%2F%2Fdashboard.lusha.com%2Finstalled")
@@ -66,20 +70,10 @@ try:
     driver.switch_to.window(driver.window_handles[1])
     logging.info("Opened LinkedIn in a new tab")
 
-    # LinkedIn Login
+   
     wait.until(EC.presence_of_element_located((By.NAME, "session_key")))
 
-    # Enter email and password, then sign in
-    signin = driver.find_element(By.NAME, "session_key")
-    signin.send_keys("kaygee1803@gmail.com")
-    logging.debug("Entered email")
-
-    passw = driver.find_element(By.NAME, "session_password")
-    passw.send_keys("Koosh-180305")
-    logging.debug("Entered password")
-
-    passw.send_keys(Keys.RETURN)  # Press the Enter key to submit the form
-    logging.info("Submitted login form by pressing Enter")
+   # WAITING TIME FOR LUSHA CAPTCHA IF PRESENT - ALSO REFRESH LINKED IN IF LUSHA CAPTCHA COMES
     time.sleep(15)
     
     # Wait for the page to load after login
@@ -112,12 +106,12 @@ try:
         # After clicking the button, wait for some time for new elements to load
         time.sleep(5)
 
-        # Get the 11th and 13th "app-aware-link" elements
+        # SEARCH ICON ON LUSHA
         links = driver.find_elements(By.CLASS_NAME, "tab-nav-text")
         
         links[1].click()
         time.sleep(3)
-        comp = driver.find_element(By.ID, "tab-companies")
+        comp = driver.find_element(By.ID, "tab-companies")  # COMPANIES ICON ON LUSHA
         comp.click()
         time.sleep(2)
 
@@ -154,13 +148,12 @@ try:
                 try:
                     search_input = driver.find_element(By.CSS_SELECTOR, "input[data-test-id='employees-search-bar']")
                     search_input.clear()  # Clear any existing text in the input field
-                    search_input.send_keys("HR")
+                    search_input.send_keys("HR")   # POSITION OF PERSON YOU WANT ( CHANGEABLE )
                     search_input.send_keys(Keys.RETURN)
-                    logging.info("Entered 'HR' into the search input field")
+                    logging.info("Entered 'HR' into the search input field")  # NO NEED TO CHANGE THIS 
                     time.sleep(2)
 
-                    img_right = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/Right8x8.svg' and @alt='Right'][1]")
-                    img_right.click()
+                    img_right = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/Right8x8.svg' and @alt='Right'][1]")   # CHANGEABLE IF YOU WANT 2ND PERSON , CHANGE [1] TO [2] AND SO ON                    img_right.click()
                     time.sleep(2)
                     logging.info("Clicked on the first occurrence of the 'Right' image")
 
@@ -176,8 +169,18 @@ try:
                     except NoSuchElementException:
                         logging.warning("Show email button not found")
                         try:
-                            buttonm = driver.find_element(By.XPATH, "//button[@data-test-id='show-email']") 
-                            logging.info("Details are already shown")    
+                             show_email_script = """
+                        var buttons = document.querySelectorAll('button');
+                        for (var i = 0; i < buttons.length; i++) {
+                        console.log(buttons[i].textContent)
+                            if (buttons[i].textContent.includes('Show Email')) {
+                                buttons[i].click();
+                                break;
+                            }
+                        }
+                        """
+                             driver.execute_script(show_email_script)  
+                             time.sleep(3) 
                         except NoSuchElementException:
                             logging.warning("Email button not found")
 
@@ -208,16 +211,28 @@ try:
                         logging.warning("Phone number button not found")
                     
                     try:
-                        phone_elements = driver.find_elements(By.XPATH, "//div[@class='TextContainer-sc-16ba1uz-0 iKhsI contact-detail clickable']")
-                        phone_number1 = phone_elements[0].text.strip() if len(phone_elements) > 0 else None
-                        phone_number2 = phone_elements[1].text.strip() if len(phone_elements) > 1 else None
-
-                        logging.info(f"Extracted phone number 1: {phone_number1}")
-                        logging.info(f"Extracted phone number 2: {phone_number2}")
+                        # Use JavaScript to extract the phone number text based on class name
+                        phone_number_script = """
+                        var phoneElements = document.getElementsByClassName('user-base');
+                        var phoneNumbers = [];
+                        for (var i = 0; i < phoneElements.length; i++) {
+                            phoneNumbers.push(phoneElements[i].textContent.trim());
+                        }
+                        return phoneNumbers;
+                        """
+                        phone_numbers = driver.execute_script(phone_number_script)
+    
+                         # Initialize an array of two phone numbers with None
+                        phone_numbers_array = [0, 0]
+    
+    # Populate the array with extracted phone numbers, if available
+                        for i in range(min(2, len(phone_numbers))):
+                            phone_numbers_array[i] = phone_numbers[i]
+    
+                        logging.info(f"Extracted phone numbers: {phone_numbers_array}")
                     except NoSuchElementException:
+                        phone_numbers_array = [0, 0]
                         logging.warning("Phone numbers not found")
-                        phone_number1 = None
-                        phone_number2 = None
 
                     # Click on cancel button after showing phone number (if exists)
                     try:
@@ -235,14 +250,24 @@ try:
                     except NoSuchElementException:
                         logging.warning("Cancel button not found")
 
-                    # Store the data in the list
-                    all_data.append({
-                        "company": company,
-                        "name": name_text,
-                        "email": email_text,
-                        "phone1": phone_number1,
-                        "phone2": phone_number2
-                    })
+                    if phone_numbers_array[1] is None:
+    # Only one phone number
+                        all_data.append({
+                              "company": company,
+                              "name": name_text,
+                              "email": email_text,
+                             "phone1": phone_numbers_array[0],
+                             "phone2": None
+                           })
+                    else:
+    # Two phone numbers
+                            all_data.append({
+                             "company": company,
+                              "name": name_text,
+                              "email": email_text,
+                              "phone1": phone_numbers_array[0],
+                              "phone2": phone_numbers_array[1]
+                           })
 
                     # Go back to the previous pages to start the loop for the next company
                     app_back_element = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/AppBack.svg' and @alt='AppBack']")
@@ -252,7 +277,7 @@ try:
                     time.sleep(1)
 
                 except Exception as e:   # EMPLOYEE NOT FOUND
-                    logging.warning(f"An error occurred while processing company '{company}': {e}")
+                    logging.warning(f"An error occurred while processing company 1 '{company}': {e}")
                     app_back_element = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/AppBack.svg' and @alt='AppBack']")
                     app_back_element.click()
                     continue  # Skip to the next company in case of an error
@@ -266,12 +291,11 @@ try:
 
     # Add a sleep to keep the browser open for debugging purposes
     logging.info("Keeping the browser open for 30 seconds for debugging purposes.")
-    time.sleep(30)  # Adjust the sleep time as needed for debugging
+    time.sleep(10)  # Adjust the sleep time as needed for debugging
 
     # Keep the script running to keep the browser open
     logging.info("Keeping the browser open indefinitely for debugging purposes.")
-    while True:
-        time.sleep(1)
+    
 
 except TimeoutException as e:
     logger.error("TimeoutException: %s", e)
@@ -292,7 +316,7 @@ finally:
 
     # Save all collected data to a CSV file
     all_data_df = pd.DataFrame(all_data)
-    all_data_df.to_csv("all_companies_contacts.csv", index=False)
+    all_data_df.to_csv("all_companies_contacts.csv", index=False)    
     logging.info("Saved all companies' contacts to all_companies_contacts.csv")
 
     # Print the DataFrame
@@ -300,4 +324,3 @@ finally:
 
     logger.info("Closing the browser")
     driver.quit()
-#<div id="svg-container" data-test-id="show-phone" class="SVGContainer-sc-1lmz6c6-0 cFkDTL"><svg xmlns="http://www.w3.org/2000/svg" fill="none" height="16" width="16"><path fill="#000" fill-rule="evenodd" d="M2.92.386c-.371.081-.633.255-1.121.747-.389.392-.625.682-.814 1-.55.925-.684 2.207-.34 3.237.168.503.372.851 1.042 1.775a29.518 29.518 0 0 0 7.072 6.932c.65.455 1.114.672 1.724.807.234.052.352.061.757.06.705-.001 1.169-.1 1.734-.368.503-.239.819-.479 1.375-1.047.47-.479.603-.694.68-1.098.1-.523-.003-1.024-.293-1.428-.065-.089-.614-.656-1.22-1.258C12.481 8.717 12.4 8.643 12.2 8.54a1.626 1.626 0 0 0-.853-.2c-.512-.001-.868.137-1.258.49-.125.113-.265.152-.377.105-.115-.047-3.225-3.173-3.247-3.263-.031-.128.008-.224.17-.417.309-.368.432-.703.432-1.18 0-.369-.031-.512-.179-.822L6.768 3 5.591 1.826C4.293.531 4.27.513 3.825.4A2.354 2.354 0 0 0 2.92.386m.643 1.531c.123.092 1.903 1.88 1.967 1.976a.382.382 0 0 1 .043.177c0 .097-.021.137-.161.308-.621.754-.606 1.721.037 2.451.109.124.886.908 1.728 1.744 1.574 1.565 1.635 1.619 1.989 1.761.598.242 1.35.108 1.855-.331.214-.185.303-.212.457-.137.071.034.449.394 1.086 1.033 1.031 1.036 1.037 1.042.996 1.241-.022.103-.571.66-.843.854-.507.361-1.177.532-1.759.448a2.913 2.913 0 0 1-.851-.274c-.358-.2-1.487-1.026-2.215-1.62a30.036 30.036 0 0 1-3.876-3.841c-.567-.679-1.528-1.978-1.752-2.369-.23-.4-.336-.86-.309-1.333.028-.475.163-.881.42-1.262.125-.185.752-.842.838-.878a.358.358 0 0 1 .35.052"></path></svg></div>
