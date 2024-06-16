@@ -80,7 +80,7 @@ To run this script, ensure you have the following installed:
 
  ```sh
        Python Combined.py
-        ```
+ ```
 
 
 ## Manual Stuff To Do 
