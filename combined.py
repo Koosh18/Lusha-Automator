@@ -55,7 +55,7 @@ try:
 
     # Wait for the password input to be present and enter the password
     password_field = wait.until(EC.presence_of_element_located((By.NAME, "password")))
-    password_field.send_keys("Koosh_180305")
+    password_field.send_keys("Your Password")
     logging.info("Entered password")
 
     # Wait for the login button to be clickable and click it
