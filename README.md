@@ -38,7 +38,7 @@ To run this script, ensure you have the following installed:
     - Run the following command to install the necessary packages:
 
         ```sh
-        pip install selenium pandas webdriver-manager
+        pip install selenium pandas webdriver-manager openpyxl
         ```
 
 3. **Download the Lusha Chrome extension:**
