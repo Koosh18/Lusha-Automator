@@ -153,7 +153,8 @@ try:
                     logging.info("Entered 'HR' into the search input field")  # NO NEED TO CHANGE THIS 
                     time.sleep(2)
 
-                    img_right = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/Right8x8.svg' and @alt='Right'][1]")   # CHANGEABLE IF YOU WANT 2ND PERSON , CHANGE [1] TO [2] AND SO ON                    img_right.click()
+                    img_right = driver.find_element(By.XPATH, "//img[@src='https://static-assets.lusha.com/plugin/icons/Right8x8.svg' and @alt='Right'][1]")   # CHANGEABLE IF YOU WANT 2ND PERSON , CHANGE [1] TO [2] AND SO ON                   
+                    img_right.click()
                     time.sleep(2)
                     logging.info("Clicked on the first occurrence of the 'Right' image")
 
